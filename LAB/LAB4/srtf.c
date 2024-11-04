@@ -36,7 +36,7 @@ ArrPCB inputFromFile(FILE *);
 void swapProcess(PCB *, PCB *);
 int selectByiCriteria(PCB[], int, SORT_BY);
 int partition(PCB[], int, int, SORT_BY);
-void quickSort(PCB *, int, int, SORT_BY);
+void quickSort(PCB[], int, int, SORT_BY);
 void sort(ArrPCB, SORT_BY);
 void pushProcess(ArrPCB *, PCB);
 void removeProcess(ArrPCB *, int);
@@ -233,7 +233,7 @@ int partition(PCB P[], int low, int high, SORT_BY iCriteria)
     return i + 1;
 }
 
-void quickSort(PCB *P, int low, int high, SORT_BY iCriteria)
+void quickSort(PCB P[], int low, int high, SORT_BY iCriteria)
 {
     if (low < high)
     {
