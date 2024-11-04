@@ -173,7 +173,7 @@ void closeFiles(Files *files)
 
 ArrPCB initArrPCB(int numberOfProcess)
 {
-    return (ArrPCB){0, malloc(sizeof(PCB[numberOfProcess]))};
+    return (ArrPCB){0, (PCB *)malloc(sizeof(PCB[numberOfProcess]))};
 }
 
 ArrPCB inputFromFile(FILE *in)
