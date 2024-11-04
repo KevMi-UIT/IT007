@@ -34,9 +34,9 @@ void closeFiles(Files *);
 ArrPCB initArrPCB(int);
 ArrPCB inputFromFile(FILE *);
 void swapProcess(PCB *, PCB *);
-int selectByiCriteria(PCB[], int, SORT_BY);
-int partition(PCB[], int, int, SORT_BY);
-void quickSort(PCB[], int, int, SORT_BY);
+int selectByiCriteria(PCB *, int, SORT_BY);
+int partition(PCB *, int, int, SORT_BY);
+void quickSort(PCB *, int, int, SORT_BY);
 void sort(ArrPCB, SORT_BY);
 void pushProcess(ArrPCB *, PCB);
 void removeProcess(ArrPCB *, int);
@@ -65,14 +65,14 @@ int main()
         {
             PCB *currentP = &readyQueue.processes[0];
 
-            // Gan iStart cho currentP neu currentP duoc chay lan dau tiem
+            // Gan iStart va iResponse cho currentP neu currentP duoc chay lan dau tiem
             if (currentP->iRemain == currentP->iBurst)
             {
                 currentP->iStart = currentTime;
                 currentP->iResponse = currentTime - currentP->iArrival;
             }
 
-            // Neu input con process va iArrival cua process do < thoi diem ket thuc du kien cua currentP
+            // Neu input van con process va iArrival cua process do < thoi diem ket thuc du kien cua currentP
             // Voi: Thoi diem ket thuc du tinh = iRemain + currentTime
             if (input.n > 0 && input.processes[0].iArrival < currentP->iRemain + currentTime)
             {
@@ -197,7 +197,7 @@ void swapProcess(PCB *P, PCB *Q)
     *Q = temp;
 }
 
-int selectByiCriteria(PCB P[], int index, SORT_BY iCriteria)
+int selectByiCriteria(PCB *P, int index, SORT_BY iCriteria)
 {
     switch (iCriteria)
     {
@@ -216,7 +216,7 @@ int selectByiCriteria(PCB P[], int index, SORT_BY iCriteria)
     }
 }
 
-int partition(PCB P[], int low, int high, SORT_BY iCriteria)
+int partition(PCB *P, int low, int high, SORT_BY iCriteria)
 {
     int pivot = selectByiCriteria(P, high, iCriteria);
     int i = low - 1;
@@ -233,7 +233,7 @@ int partition(PCB P[], int low, int high, SORT_BY iCriteria)
     return i + 1;
 }
 
-void quickSort(PCB P[], int low, int high, SORT_BY iCriteria)
+void quickSort(PCB *P, int low, int high, SORT_BY iCriteria)
 {
     if (low < high)
     {
