@@ -1,0 +1,6 @@
+- enable - disable raw mode: https://viewsourcecode.org/snaptoken/kilo/02.enteringRawMode.html
+- dup2: https://www.geeksforgeeks.org/dup-dup2-linux-system-call/
+- \r\033[K: Erase to end of line (https://stackoverflow.com/a/7342591/23173098)
+- strok: Split char* with delimiter (https://cplusplus.com/reference/cstring/strtok/)
+- pipe sample: https://www.geeksforgeeks.org/making-linux-shell-c/
+- trim string: https://stackoverflow.com/a/1431206/23173098
