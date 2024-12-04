@@ -22,8 +22,9 @@ char history[HISTORY_SIZE][MAX_CMD_LEN];
 int history_count = 0;
 
 // UTILS to trim string
-void trim_whitespace(char str[], int length)
+void trim_whitespace(char str[])
 {
+    int length = strlen(str);
     if (length <= 0)
     {
         return;
@@ -51,6 +52,10 @@ void trim_whitespace(char str[], int length)
 
 void trim_parentheses(char str[])
 {
+    if (str[0] != '(' || str[0] == '\0')
+    {
+        return;
+    }
     int i = 0;
     while (str[i] != ')')
     {
@@ -62,6 +67,11 @@ void trim_parentheses(char str[])
 
 // Original terminal attributes (to restore later)
 struct termios orig_termios;
+
+void disable_raw_mode()
+{
+    tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios);
+}
 
 void enable_raw_mode()
 {
@@ -98,8 +108,15 @@ void add_to_history(const char *cmd)
 {
     if (strlen(cmd) == 0)
         return;
-    strncpy(history[history_count % HISTORY_SIZE], cmd, MAX_CMD_LEN); // Like circle of history
-    history_count++;
+    for (int i = HISTORY_SIZE - 1; i > 0; --i)
+    {
+        strncpy(history[i], history[i - 1], MAX_CMD_LEN);
+    }
+    strncpy(history[0], cmd, MAX_CMD_LEN);
+    if (history_count < HISTORY_SIZE)
+    {
+        history_count++;
+    }
 }
 
 void execute_command(char *cmd)
@@ -209,7 +226,7 @@ void handle_continuous(char *cmd)
 void read_command(char *cmd)
 {
     int pos = 0; // command position to remember to append or delete to cmd
-    int history_index = history_count;
+    int history_index = -1;
     char c;
 
     printf("%s ", PROMPT);
@@ -236,32 +253,31 @@ void read_command(char *cmd)
                 {
                 case 'A': {
                     // Up arrow
-                    if (history_index > 0)
+                    if (history_index < history_count - 1)
                     {
-                        history_index--;
+                        ++history_index;
                         empty_string(cmd, sizeof(cmd));
-                        strcpy(cmd, history[history_index % HISTORY_SIZE]);
-                        reprint_prompt(history[history_index % HISTORY_SIZE]);
+                        strcpy(cmd, history[history_index]);
+                        reprint_prompt(cmd);
                         pos = strlen(cmd);
                     }
                     break;
                 }
                 case 'B': {
                     // Down arrow
-                    if (history_index < history_count - 1)
+                    if (history_index >= 0)
                     {
-                        history_index++;
+                        --history_index;
                         empty_string(cmd, sizeof(cmd));
-                        strcpy(cmd, history[history_index % HISTORY_SIZE]);
-                        reprint_prompt(history[history_index % HISTORY_SIZE]);
+                        strcpy(cmd, history[history_index]);
+                        reprint_prompt(cmd);
                         pos = strlen(cmd);
                     }
                     else
                     {
                         // No history left, return back to new command prompt
-                        history_index = history_count;
-                        printf("\r\033[K%s %s", PROMPT, "");
                         empty_string(cmd, sizeof(cmd));
+                        reprint_prompt(cmd);
                         pos = 0;
                     }
                     break;
@@ -278,6 +294,11 @@ void read_command(char *cmd)
             }
             cmd[--pos] = '\0';
             reprint_prompt(cmd);
+        }
+        // Max cmd length reached
+        else if (pos == MAX_CMD_LEN - 1)
+        {
+            continue;
         }
         // Regular char
         else
@@ -298,19 +319,13 @@ int main()
     {
         empty_string(cmd, sizeof(cmd));
         read_command(cmd);
-        trim_whitespace(cmd, sizeof(cmd));
-
-        if (strcmp(cmd, "") == 0)
-        {
-            continue;
-        }
+        add_to_history(cmd);
+        trim_whitespace(cmd);
 
         if (strcmp(cmd, "exit") == 0)
         {
             break; // instead of checking should_run
         }
-
-        add_to_history(cmd);
 
         subprocessID = fork();
         if (subprocessID == 0)
@@ -339,5 +354,6 @@ int main()
         }
     }
 
+    // disable_raw_mode(); // Currently disable due to mis alignment
     return 0;
 }
